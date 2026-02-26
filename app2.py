@@ -7,10 +7,10 @@ from PIL import Image, ImageOps
 # 1. Base de données complète des panneaux (ENSIM / Rénoval)
 panneaux_infos = {
     "Panneau 1": {"modele": "ISOMAT 2 CONFORT", "epaisseur": "32mm", "composition": "Alu / XPS / EPDM / Alu", "image": "P1.png"},
-    "Panneau 2": {"modele": "ISOMAT 2 PREMIUM", "epaisseur": "51mm", "composition": "Alu / XPS / Alu", "image": "P2.png"},
-    "Panneau 3": {"modele": "ISOMAT 2 CONFORT", "epaisseur": "57mm", "composition": "Alu / XPS / EPDM / Alu", "image": "P3.png"},
+    "Panneau 2": {"modele": "Faux plafond", "epaisseur": "51mm", "composition": "Alu / XPS / Alu", "image": "P2.png"},
+    "Panneau 3": {"modele": "ISOMAT 2 PREMIUM", "epaisseur": "57mm", "composition": "Alu / XPS / EPDM / Alu", "image": "P3.png"},
     "Panneau 4": {"modele": "ISOMAT 2 PRESTIGE", "epaisseur": "70mm", "composition": "Alu / XPS / EPDM / Alu", "image": "P4.png"},
-    "Panneau 5": {"modele": "PRESTIGE OPTIMA", "epaisseur": "70mm", "composition": "Alu / XPS / EPDM / Alu / Membrane cuir", "image": "P5.png"},
+    "Panneau 5": {"modele": "ISOMAT 2 PRESTIGE OPTIMA", "epaisseur": "70mm", "composition": "Alu / XPS / EPDM / Alu / Membrane cuir", "image": "P5.png"},
     "Panneau 6": {"modele": "HOME ISO", "epaisseur": "97mm", "composition": "Alu / XPS Expansé / XPS Extrudé / EPDM / Alu", "image": "P6.png"}
 }
 
@@ -50,6 +50,7 @@ if selection:
             * **Composition :** {info['composition']}
             ---
             """, unsafe_allow_html=True)
+    
 
     # 4. Graphique Comparatif
     st.divider()
