@@ -1,48 +1,52 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import glob
-import os
 
-# 1. Recherche automatique des 6 fichiers NarrowBands
-file_list = sorted(glob.glob("*_NarrowBands.txt"))
+# 1. Chargement des fichiers
+freq_file = "freqs.txt"
+data_file = "Moyenne_TL.txt"
 
+# Lecture des fréquences : 
+# On force la lecture de la SEULE première colonne pour éviter les colonnes fantômes
+freqs = pd.read_csv(freq_file, sep='\t', header=None, usecols=[0], names=['Frequency'])
+
+# Lecture des données TL (les 6 colonnes)
+data_tl = pd.read_csv(data_file, sep='\t', header=None)
+
+# Pour éviter l'erreur de "Union", on s'assure que les deux objets sont des DataFrames simples
+# et on les aligne par l'index de ligne
+df = pd.concat([freqs.reset_index(drop=True), data_tl.reset_index(drop=True)], axis=1)
+
+# Renommer les colonnes : 1 pour la fréquence + 6 pour les panneaux
+panneaux_labels = ["Panneau 1", "Panneau 2", "Panneau 3", "Panneau 4", "Panneau 5", "Panneau 6"]
+df.columns = ['Frequency'] + panneaux_labels
+
+# 2. Configuration du graphique
 plt.figure(figsize=(14, 8))
-
-# Palette de couleurs distinctes
 colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
 
-for i, file in enumerate(file_list):
-    # Nom du panneau pour la légende
-    label_name = os.path.basename(file).split('_TL')[0]
+# 3. Traitement et tracé
+for i, label in enumerate(panneaux_labels):
+    # Calcul du moyennage glissant (50 Hz)
+    # On ignore les valeurs NaN créées sur les bords par le rolling
+    tl_smooth = df[label].rolling(window=50, center=True).mean()
     
-    # Lecture des données (tabulation)
-    data = pd.read_csv(file, sep='\t')
+    # Tracé : Courbe brute (alpha=0.15 pour la transparence)
+    plt.plot(df['Frequency'], df[label], color=colors[i], alpha=0.15, linewidth=0.5)
     
-    # --- MOYENNAGE 50 Hz ---
-    # Le pas étant de 1 Hz, une fenêtre de 50 points = 50 Hz
-    data['TL_avg'] = data['TL (dB)'].rolling(window=50, center=True).mean()
-    
-    # Tracé : Bande fine en fond (très clair) + Courbe moyennée (gras)
-    plt.plot(data['Frequency (Hz)'], data['TL (dB)'], color=colors[i], alpha=0.15, linewidth=0.5)
-    plt.plot(data['Frequency (Hz)'], data['TL_avg'], color=colors[i], label=f"{label_name} (Moy. 50Hz)", linewidth=2)
+    # Tracé : Courbe lissée
+    plt.plot(df['Frequency'], tl_smooth, color=colors[i], label=f"{label} (Moy. 50Hz)", linewidth=2)
 
-# 2. Mise en forme Log/Ingénieur
+# 4. Mise en forme
 plt.xscale('log')
 plt.xlim(100, 5000)
-plt.ylim(0, 60) # Ajuster selon vos maximums
+plt.ylim(0, 60)
 
-# Graduation standard acoustique
-ticks = [100, 200, 500, 1000, 2000, 5000]
-plt.xticks(ticks, [str(t) for t in ticks])
+plt.title("Indice d'Affaiblissement Acoustique (TL) - Comparaison des 6 panneaux", fontsize=14)
+plt.xlabel("Fréquence (Hz)", fontsize=12)
+plt.ylabel("Transmission Loss (dB)", fontsize=12)
 
-plt.grid(True, which="both", ls="-", alpha=0.3)
-plt.xlabel('Fréquence (Hz)', fontsize=12)
-plt.ylabel('Transmission Loss (dB)', fontsize=12)
-plt.title('Comparaison TL : Bandes Fines avec Moyennage Glissant 50 Hz', fontsize=14, fontweight='bold')
+plt.grid(True, which='both', linestyle='--', alpha=0.5)
+plt.legend(loc='upper left', fontsize=10, ncol=2) # Légende sur 2 colonnes pour la lisibilité
 
-plt.legend(loc='upper left', bbox_to_anchor=(1, 1), fontsize=10)
 plt.tight_layout()
-
-# 3. Sauvegarde
-plt.savefig('Comparaison_TL_Moyenne_50Hz.png', dpi=300)
 plt.show()
